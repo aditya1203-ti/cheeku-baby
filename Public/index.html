@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For Cheeku ❤️</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffd6e5, #fff5f8);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      padding: 30px 22px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,.15);
+    }
+
+    .heart {
+      font-size: 55px;
+      animation: beat 1.2s infinite;
+    }
+
+    @keyframes beat {
+      50% {
+        transform: scale(1.15);
+      }
+    }
+
+    h1 {
+      color: #e6396f;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.5;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 15px;
+      background: #ff5c8a;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e94776;
+    }
+
+    .secondary {
+      background: #eeeeee;
+      color: #444;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .result {
+      color: #e6396f;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="heart">❤️</div>
+
+  <!-- START -->
+  <div id="startScreen">
+
+    <h1>Hey Cheeku 👀</h1>
+
+    <p>
+      I have a very important question for you...
+      <br><br>
+      But obviously, I can't ask it normally 😌❤️
+    </p>
+
+    <button onclick="startGame()">
+      Start Mission 💌
+    </button>
+
+  </div>
+
+
+  <!-- QUESTIONS -->
+  <div id="game" class="hidden">
+
+    <p id="progress"></p>
+
+    <h2 id="question"></h2>
+
+    <div id="answers"></div>
+
+    <p id="message"></p>
+
+  </div>
+
+
+  <!-- DATE PROPOSAL -->
+  <div id="dateScreen" class="hidden">
+
+    <h1>Mission Unlocked 🔓❤️</h1>
+
+    <p>
+      Okay Cheeku...
+      <br><br>
+      Enough questions 😌
+    </p>
+
+    <h2>
+      Will you go on a date with me? 🥹❤️
+    </h2>
+
+    <button onclick="yesClicked()">
+      YES ❤️
+    </button>
+
+    <button class="secondary" onclick="noClicked()">
+      Let me think 🙈
+    </button>
+
+    <p id="finalMessage"></p>
+
+  </div>
+
+
+  <!-- DATE CHOICE -->
+  <div id="choiceScreen" class="hidden">
+
+    <h1>Yessss! 🥹❤️</h1>
+
+    <p>
+      Now choose our little date 👀
+    </p>
+
+    <button onclick="dateChoice('Cafe ☕')">
+      Cafe & Long Talks ☕
+    </button>
+
+    <button onclick="dateChoice('Movie 🎬')">
+      Movie Together 🎬
+    </button>
+
+    <button onclick="dateChoice('Just Us ❤️')">
+      Just Spend Time Together ❤️
+    </button>
+
+    <p class="result" id="chosen"></p>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const questions = [
+
+  {
+    question: "If I suddenly say 'Get ready'... what would you do? 👀",
+
+    answers: [
+      "Ask where we're going 😂",
+      "Get ready immediately 😏",
+      "Ignore you 🙈"
+    ],
+
+    correct: 1
+  },
+
+  {
+    question: "Which sounds better with me? ❤️",
+
+    answers: [
+      "A boring normal day 😴",
+      "Good food + conversations + you & me 🥹",
+      "Sleeping 😂"
+    ],
+
+    correct: 1
+  },
+
+  {
+    question: "Do you think we need a little 'us time'? 👀❤️",
+
+    answers: [
+      "Maybe 👀",
+      "Obviously ❤️",
+      "Nope 😂"
+    ],
+
+    correct: 1
+  }
+
+];
+
+let current = 0;
+
+
+function startGame() {
+
+  document
+    .getElementById("startScreen")
+    .classList.add("hidden");
+
+  document
+    .getElementById("game")
+    .classList.remove("hidden");
+
+  showQuestion();
+}
+
+
+function showQuestion() {
+
+  const q = questions[current];
+
+  document.getElementById("progress").innerText =
+    "Question " + (current + 1) + " / " + questions.length;
+
+  document.getElementById("question").innerText =
+    q.question;
+
+  document.getElementById("message").innerText = "";
+
+  const answers =
+    document.getElementById("answers");
+
+  answers.innerHTML = "";
+
+
+  q.answers.forEach((answer, index) => {
+
+    const button = document.createElement("button");
+
+    button.innerText = answer;
+
+    button.onclick = function() {
+
+      if (index === q.correct) {
+
+        document.getElementById("message").innerText =
+          "Hmm... I like your answer 😌❤️";
+
+        setTimeout(() => {
+
+          current++;
+
+          if (current < questions.length) {
+
+            showQuestion();
+
+          } else {
+
+            showDateProposal();
+
+          }
+
+        }, 800);
+
+      } else {
+
+        document.getElementById("message").innerText =
+          "Wrong answer 😂 Try again...";
+
+      }
+
+    };
+
+    answers.appendChild(button);
+
+  });
+
+}
+
+
+function showDateProposal() {
+
+  document
+    .getElementById("game")
+    .classList.add("hidden");
+
+  document
+    .getElementById("dateScreen")
+    .classList.remove("hidden");
+
+}
+
+
+function yesClicked() {
+
+  document
+    .getElementById("dateScreen")
+    .classList.add("hidden");
+
+  document
+    .getElementById("choiceScreen")
+    .classList.remove("hidden");
+
+}
+
+
+function noClicked() {
+
+  document.getElementById("finalMessage").innerText =
+    "Take your time... but I already have a feeling you'll say YES 😏❤️";
+
+}
+
+
+async function dateChoice(choice) {
+
+  try {
+
+    const response = await fetch("/api/date-response", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        choice: choice
+      })
+
+    });
+
+
+    const data = await response.json();
+
+
+    if (data.success) {
+
+      document.getElementById("chosen").innerHTML =
+        "Date selected: " + choice +
+        "<br><br>" +
+        "Actually, place doesn't matter... ❤️" +
+        "<br>" +
+        "<b>I just want to spend some time with you. 🥹❤️</b>";
+
+    }
+
+  } catch (error) {
+
+    document.getElementById("chosen").innerText =
+      "Oops! Something went wrong 😭";
+
+    console.error(error);
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
