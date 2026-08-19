@@ -81,6 +81,52 @@
       font-size: 20px;
       font-weight: bold;
     }
+
+    .date-box {
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .date-box label {
+      display: block;
+      color: #e6396f;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .date-box input {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid #ffd0dd;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .payment-box {
+      margin-top: 20px;
+      padding: 18px;
+      background: #fff5f8;
+      border-radius: 18px;
+    }
+
+    .qr {
+      width: 220px;
+      max-width: 100%;
+      margin: 15px auto;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .payment-text {
+      color: #e6396f;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #28a745;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -175,6 +221,88 @@
 
   </div>
 
+
+  <!-- DATE SELECTION -->
+  <div id="dateSelectScreen" class="hidden">
+
+    <h1>One More Thing 📅❤️</h1>
+
+    <p id="selectedActivity"></p>
+
+    <div class="date-box">
+
+      <label for="dateInput">
+        Choose our date 📅
+      </label>
+
+      <input
+        type="date"
+        id="dateInput"
+      >
+
+    </div>
+
+    <button onclick="confirmDate()">
+      Confirm Date ❤️
+    </button>
+
+    <p id="dateMessage"></p>
+
+  </div>
+
+
+  <!-- PAYMENT -->
+  <div id="paymentScreen" class="hidden">
+
+    <h1>Almost There ❤️</h1>
+
+    <p id="paymentActivity"></p>
+
+    <div class="payment-box">
+
+      <p class="payment-text">
+        There is a small amount for our little plan ❤️
+      </p>
+
+      <p>
+        Please pay <b id="amount">₹___</b>
+        using the QR below.
+      </p>
+
+      <img
+        src="/qr.jpg"
+        alt="Payment QR"
+        class="qr"
+      >
+
+      <p>
+        Scan the QR and complete the payment ❤️
+      </p>
+
+      <p class="success">
+        After payment, just let me know 😌❤️
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- NO PAYMENT -->
+  <div id="finalScreen" class="hidden">
+
+    <h1>Perfect Choice ❤️</h1>
+
+    <p id="finalChoice"></p>
+
+    <p>
+      Place doesn't really matter... 🥹❤️
+      <br><br>
+      <b>I just want to spend some time with you.</b>
+    </p>
+
+  </div>
+
 </div>
 
 
@@ -221,6 +349,13 @@ const questions = [
 ];
 
 let current = 0;
+
+let selectedChoice = null;
+let selectedDate = null;
+
+
+// Change this whenever you want
+const PAYMENT_AMOUNT = "₹150";
 
 
 function startGame() {
@@ -334,45 +469,172 @@ function noClicked() {
 }
 
 
-async function dateChoice(choice) {
+// Activity selected
+function dateChoice(choice) {
 
-  try {
+  selectedChoice = choice;
 
-    const response = await fetch("/api/date-response", {
+  document
+    .getElementById("choiceScreen")
+    .classList.add("hidden");
 
-      method: "POST",
+  document
+    .getElementById("dateSelectScreen")
+    .classList.remove("hidden");
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+  document
+    .getElementById("selectedActivity")
+    .innerHTML =
+      "You chose: <b>" + choice + "</b> ❤️";
 
-      body: JSON.stringify({
-        choice: choice
-      })
+  // Don't allow past dates
+  const today =
+    new Date().toISOString().split("T")[0];
 
+  document
+    .getElementById("dateInput")
+    .min = today;
+
+}
+
+
+// Date confirmed
+async function confirmDate() {
+
+  const dateInput =
+    document.getElementById("dateInput");
+
+  if (!dateInput.value) {
+
+    document.getElementById("dateMessage").innerText =
+      "Pehle date select karo ❤️";
+
+    return;
+
+  }
+
+
+  selectedDate = dateInput.value;
+
+
+  // Convert date into nice format
+  const dateObject =
+    new Date(selectedDate + "T00:00:00");
+
+  const formattedDate =
+    dateObject.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
     });
 
 
-    const data = await response.json();
+  // --------------------------------
+  // JUST US — NO PAYMENT
+  // --------------------------------
+
+  if (selectedChoice === "Just Us ❤️") {
+
+    document
+      .getElementById("dateSelectScreen")
+      .classList.add("hidden");
+
+    document
+      .getElementById("finalScreen")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("finalChoice")
+      .innerHTML =
+        "Our date: <b>" +
+        formattedDate +
+        "</b> ❤️";
+
+    await sendResponse(selectedChoice, formattedDate);
+
+    return;
+
+  }
 
 
-    if (data.success) {
+  // --------------------------------
+  // CAFE / MOVIE — PAYMENT
+  // --------------------------------
 
-      document.getElementById("chosen").innerHTML =
-        "Date selected: " + choice +
-        "<br><br>" +
-        "Actually, place doesn't matter... ❤️" +
-        "<br>" +
-        "<b>I just want to spend some time with you. 🥹❤️</b>";
+  document
+    .getElementById("dateSelectScreen")
+    .classList.add("hidden");
+
+  document
+    .getElementById("paymentScreen")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("amount")
+    .innerText = PAYMENT_AMOUNT;
+
+  document
+    .getElementById("paymentActivity")
+    .innerHTML =
+      "<b>" +
+      selectedChoice +
+      "</b>" +
+      "<br><br>" +
+      "Our date: <b>" +
+      formattedDate +
+      "</b> ❤️";
+
+
+  await sendResponse(selectedChoice, formattedDate);
+
+}
+
+
+// Send response to backend
+async function sendResponse(choice, date) {
+
+  try {
+
+    const response =
+      await fetch("/api/date-response", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          choice: choice,
+
+          selectedDate: date
+
+        })
+
+      });
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      console.error(
+        "Response was not saved."
+      );
 
     }
 
-  } catch (error) {
+  }
 
-    document.getElementById("chosen").innerText =
-      "Oops! Something went wrong 😭";
+  catch (error) {
 
-    console.error(error);
+    console.error(
+      "Server error:",
+      error
+    );
 
   }
 
